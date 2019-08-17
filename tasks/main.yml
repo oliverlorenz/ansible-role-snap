@@ -1,7 +1,11 @@
 ---
 - name: install snapd
   apt:
-    name: snapd
+    name:
+      - snapd
+      - fuse
+      - squashfuse
+    update_cache: true
 
 - name: ensure snap service is running
   service:
@@ -9,16 +13,12 @@
     state: started
     enabled: true
 
-- name: wait for snapd to be ready
-  command: snap find test
-  retries: 3
-  delay: 30
-  register: result
-  until: result.rc == 0
-  changed_when: false
-
 - name: Install snap packages
   snap:
     name: "{{ item.name }}"
     classic: "{{ item.use_classic }}"
   with_items: "{{ snap_packages }}"
+  retries: 3
+  delay: 30
+  register: result
+  until: result.rc == 0
